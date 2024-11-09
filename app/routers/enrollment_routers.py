@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.db import get_db
 from app.schemas import EnrollmentCreate, EnrollmentResponse, EnrollmentUpdate
-from app.repositories.enrollment_repositories import create_enrollment, get_enrollment, update_enrollment, \
-    delete_enrollment, get_enrollments_by_student
+from app.repositories.enrollment_repositories import  create_enrollment, get_enrollment_by_student_and_course, update_enrollment, delete_enrollment,get_all_enrollments
 from app.services import enrollment_service
+from app.services.enrollment_service import get_enrollment_service
 from typing import List
 
 router = APIRouter()
@@ -14,20 +14,26 @@ router = APIRouter()
 @router.post("/enrollments/", response_model=EnrollmentResponse)
 def create_enrollment_route(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
     # Check if the student is already enrolled in the course
-    existing_enrollment = get_enrollment(db, student_id=enrollment.stud_id, course_id=enrollment.course_id)
+    existing_enrollment = get_enrollment_by_student_and_course(db, stud_id=enrollment.stud_id, course_id=enrollment.course_id)
     if existing_enrollment:
         raise HTTPException(status_code=400, detail="Student is already enrolled in this course.")
 
     # If not, create a new enrollment
-    new_enrollment = enrollment_service.create_enrollment_service(db=db, enrollment=enrollment)
+    new_enrollment = enrollment_service.create_enrollment_service(db=db, enrollment_data=enrollment)
     return new_enrollment
 
+@router.get("/enrollments/", response_model=List[EnrollmentResponse])
+def get_batch_route(db: Session = Depends(get_db)):
+    enrollments = get_all_enrollments(db)
+    if not enrollments:
+        raise HTTPException(status_code=404, detail="No batches found")
+    return enrollments
 
 # Get Enrollments for a Specific Student
-@router.get("/students/{student_id}/enrollments", response_model=List[EnrollmentResponse])
-def read_student_enrollments_route(student_id: int, db: Session = Depends(get_db)):
+@router.get("/enrollments/{enrollment_id}", response_model=EnrollmentResponse)
+def read_student_enrollments_route(enrollment_id: int, db: Session = Depends(get_db)):
     # Fetch the enrollments by student ID
-    enrollments = get_enrollments_by_student(db, student_id=student_id)
+    enrollments = get_enrollment_service(db, enrollment_id=enrollment_id)
     if not enrollments:
         raise HTTPException(status_code=404, detail="No enrollments found for this student.")
 

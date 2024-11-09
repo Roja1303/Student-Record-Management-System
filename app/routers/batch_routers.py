@@ -9,27 +9,12 @@ from typing import List
 
 router = APIRouter()
 
-@router.post("/batches/", response_model=BatchResponse)
-def create_batch(batch: BatchCreate, db: Session = Depends(get_db)):
-    course = db.query(Course).filter(Course.course_id == batch.course_id).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    new_batch = Batch(
-        batch_start_date=batch.batch_start_date,
-        batch_end_date=batch.batch_end_date,
-        batch_strength=batch.batch_strength,
-        course_id=batch.course_id
-    )
-    db.add(new_batch)
-    db.commit()
-    db.refresh(new_batch)
-    return new_batch
-
-
-router.get("/batches/", response_model=List[BatchResponse])
-def read_courses_route(db: Session = Depends(get_db)):
-    return get_all_batches(db)
+@router.get("/batches/", response_model=List[BatchResponse])
+def get_batch_route(db: Session = Depends(get_db)):
+    batches = get_all_batches(db)
+    if not batches:
+        raise HTTPException(status_code=404, detail="No batches found")
+    return batches
 
 
 @router.get("/batches/{batch_id}", response_model=BatchResponse)
@@ -38,6 +23,17 @@ def get_batch_route(batch_id: int, db: Session = Depends(get_db)):
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
     return batch
+
+
+@router.post("/batches/", response_model=BatchResponse)
+def create_batch_route(batch: BatchCreate, db: Session = Depends(get_db)):
+    course = db.query(Course).filter(Course.course_id == Batch.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    new_batch = create_batch_service(db=db, batch_data=batch)  # Pass 'batch' as 'batch_data'
+    return new_batch
+
 
 @router.put("/batches/{batch_id}", response_model=BatchResponse)
 def update_batch_route(batch_id: int, batch_data: BatchUpdate, db: Session = Depends(get_db)):
