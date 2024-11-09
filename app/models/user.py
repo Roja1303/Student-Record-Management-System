@@ -48,7 +48,7 @@ class Enrollment(Base):
     stud_id = Column(Integer,ForeignKey("users.stud_id"),index=True)
     batch_id = Column(Integer,ForeignKey("batch.batch_id"),index=True)
     course_id = Column(Integer,ForeignKey('courses.course_id'),index=True)
-    enrollment_date = Column(DateTime)
+    enrollment_date = Column(Date)
 
     student = relationship("User",back_populates="enrollments")
     course = relationship("Course",back_populates="course_enrolls")

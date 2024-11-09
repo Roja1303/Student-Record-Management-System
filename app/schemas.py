@@ -45,10 +45,11 @@ class BatchUpdate(BaseModel):
     batch_strength: Optional[int] = None
 
 class BatchResponse(BaseModel):
-    batch_id : int
-    batch_sdate : date
-    batch_end_date : date
-    batch_strength : int
+    batch_id: int
+    batch_start_date: date
+    batch_end_date: date
+    batch_strength: int
+    course_id: int
 
     class Config:
         from_attributes = True
@@ -83,17 +84,17 @@ class EnrollmentCreate(BaseModel):
     stud_id: int
     course_id: int
     batch_id: int  # Use this as a model field with type annotation
-    enrollment_date: datetime
+    enrollment_date: date
 
 class EnrollmentUpdate(BaseModel):
-    enrollment_date: Optional[datetime] = None
+    enrollment_date: Optional[date] = None
 
 class EnrollmentResponse(BaseModel):
     enrollment_id: int
     stud_id: int
     course_id: int
     batch_id: int  # Use this as a model field with type annotation
-    enrollment_date: datetime
+    enrollment_date: date
 
     class Config:
         from_attributes = True

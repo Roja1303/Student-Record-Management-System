@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from app.models.user import Batch
 
 def get_all_batches(db: Session):
-    return db.query(Batch).all()
+    batches = db.query(Batch).filter(Batch.course_id != None).all()
+    return batches
 
 def get_batch(db: Session, batch_id: int):
     return db.query(Batch).filter(Batch.batch_id == batch_id).first()

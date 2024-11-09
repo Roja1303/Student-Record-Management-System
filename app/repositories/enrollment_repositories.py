@@ -1,17 +1,18 @@
 from sqlalchemy.orm import Session
 from app.models.user import Enrollment
-
+from sqlalchemy.orm import Session
+from app.models.user import Enrollment
 
 def get_enrollment(db: Session, enrollment_id: int):
     return db.query(Enrollment).filter(Enrollment.enrollment_id == enrollment_id).first()
 
-# enrollment_repositories.py
-from sqlalchemy.orm import Session
-from app.models.user import Enrollment
+def get_all_enrollments(db: Session):
+    enrollments = db.query(Enrollment).filter(Enrollment.enrollment_id != None).all()
+    return enrollments
 
-def get_enrollments_by_student(db: Session, student_id: int):
+def get_enrollment_by_student_and_course(db: Session, stud_id: int, course_id: int):
     # Fetch all enrollments for a given student ID
-    return db.query(Enrollment).filter(Enrollment.stud_id == student_id).all()
+    return db.query(Enrollment).filter(Enrollment.stud_id == stud_id,Enrollment.course_id == course_id).all()
 
 
 def create_enrollment(db: Session, enrollment: Enrollment):
